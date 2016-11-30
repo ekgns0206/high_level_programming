@@ -40,7 +40,7 @@ int enumProcess(PROC_EVENT callback, char option)
 	int fd;
 	DIR *dp;
 	struct psinfo pinfo;
-
+	
 	if((dp = opendir("/proc/")) == NULL)
 	{
 		perror("opendir: /proc/");
@@ -72,23 +72,43 @@ int enumProcess(PROC_EVENT callback, char option)
 
 int printProcess(struct psinfo pinfo, char option)
 {
+	int tty;
 	uid_t uid;
 	uid = getuid();
-
+	tty = pinfo.pr_ttydev;
 	switch(option){
 		case 0:		// no option
-			if(pinfo.pr_uid == uid && pinfo.pr_fname == "sshd"){
-				printf("%d\t%d\t\t%d:%02d\t%s\n",
-				pinfo.pr_pid, pinfo.pr_ttydev, pinfo.pr_time.tv_sec/60,
+			break;
+		case 'a':
+			if (!strcmp(pinfo.pr_fname, "bash") || !strcmp(pinfo.pr_fname, "ksh"))
+				return 0;
+			if(tty > 6291456){
+				printf("%d\tpts/%d\t\t%d:%02d\t%s\n",
+				pinfo.pr_pid, tty-6291456, pinfo.pr_time.tv_sec/60,
 				pinfo.pr_time.tv_sec%60, pinfo.pr_fname);
 			}
 			break;
-		case 'a':
-			break;
 		case 'e':
-			printf("%d\t%d\t\t%d:%02d\t%s\n",
-			pinfo.pr_pid, pinfo.pr_ttydev, pinfo.pr_time.tv_sec/60,
-			pinfo.pr_time.tv_sec%60, pinfo.pr_fname);
+			if(tty == -1){
+				printf("%d\t?\t\t%d:%02d\t%s\n",
+				pinfo.pr_pid, pinfo.pr_time.tv_sec/60,
+				pinfo.pr_time.tv_sec%60, pinfo.pr_fname);
+			}
+			else if (tty == 0){
+				printf("%d\tconsole\t\t%d:%02d\t%s\n",
+				pinfo.pr_pid, pinfo.pr_time.tv_sec/60,
+				pinfo.pr_time.tv_sec%60, pinfo.pr_fname);
+			}
+			else if (tty < 6291456){
+				printf("%d\t??\t\t%d:%02d\t%s\n",
+				pinfo.pr_pid, pinfo.pr_time.tv_sec/60,
+				pinfo.pr_time.tv_sec%60, pinfo.pr_fname);
+			}
+			else{
+				printf("%d\tpts/%d\t\t%d:%02d\t%s\n",
+				pinfo.pr_pid, tty-6291456, pinfo.pr_time.tv_sec/60,
+				pinfo.pr_time.tv_sec%60, pinfo.pr_fname);
+			}
 			break;
 		case 'f':
 			break;
@@ -109,7 +129,7 @@ int main(int argc, char **argv)
 	extern char *optarg;
 	extern int optind;
 	char option;
-
+	
 	if(argc == 1){	// no option	
 		printf("PID\tTTY\tTIME\tCMD\n");
 		enumProcess(printProcess, 0);	
@@ -119,9 +139,10 @@ int main(int argc, char **argv)
 		switch(n){
 			case 'a':
 				option = 'a';
+				printf("PID\tTTY\t\tTIME\tCMD\n");
 				break;
 			case 'e':
-				printf("PID\tTTY\tTIME\tCMD\n");
+				printf("PID\tTTY\t\tTIME\tCMD\n");
 				option = 'e';
 				break;
 			case 'f':
@@ -146,3 +167,4 @@ int main(int argc, char **argv)
 
 	return 0;	
 }
+
