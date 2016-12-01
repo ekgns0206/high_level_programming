@@ -124,7 +124,8 @@ int printProcess(struct psinfo pinfo, char option)
 				uid, (int)getpid(), (int)getppid(),
 				(hour+9)%24,min%60,(sec%3600)%60,//pinfo.pr_ctime, //STIME,
 				tty-6291456, pinfo.pr_time.tv_sec/60,
-				pinfo.pr_time.tv_sec%60, pinfo.pr_fname); 
+				pinfo.pr_time.tv_sec%60, pinfo.pr_fname);
+				//uid 정수로만 출력... tty도 고정시켜놔서 터미널 하나여야함.
 			}
 			break;
 		case 'l':
