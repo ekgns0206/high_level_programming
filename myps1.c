@@ -80,8 +80,6 @@ int printProcess(struct psinfo pinfo, char option)
 {
 	int tty;
 	struct passwd *pw;
-	char ttyString[256] = {0,};
-	char tmp[256] = {0,};
 	
 	pw = getpwuid(pinfo.pr_uid);
 	
