@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <procfs.h>		// psinfo header
 #include <pwd.h>
+#include <time.h>
 
 // PROC_EVENT 프로세스 찾을때마다 호출되는 형식
 // pid 프로세스 아이디
@@ -85,6 +86,16 @@ int printProcess(struct psinfo pinfo, char option)
 	
 	tty = pinfo.pr_ttydev;
 	
+	uid_t uid;
+	int pastime,hour,min,sec;
+
+	uid = getuid();
+	tty = pinfo.pr_ttydev;
+	pastime=(int)time(NULL);
+	sec=pastime;
+	min=(pastime/60);
+	hour=(pastime/3600);
+
 	switch(option){
 		case 0:		// no option
 			if(uid == pinfo.pr_uid){	// no tty different
@@ -189,6 +200,7 @@ int main(int argc, char **argv)
 			case 'f':
 				printf("UID\tPID\tPPID\tC\tSTIME\t\tTTY\tTIME\tCMD\n");
 				option = 'f';
+				printf("UID\tPID\tPPID\tC\tSTIME\tTTY\tTIME\tCMD\n");
 				break;
 			case 's':	// sid가 인자와 같은 프로세스만 출력	
 				printf("PID\tTTY\tTIME\tCMD\n");
