@@ -20,7 +20,7 @@ typedef int (*PROC_EVENT)(struct psinfo pinfo, char option);
 
 extern char *optarg;	// option 인자
 
-uid_t uid;	//myuid
+int mysid;
 
 // isNum 숫자로 구성된 문자열인지 검사
 // value 문자열
@@ -81,24 +81,15 @@ int printProcess(struct psinfo pinfo, char option)
 {
 	int tty;
 	struct passwd *pw;
-	
-	pw = getpwuid(pinfo.pr_uid);
-	
-	tty = pinfo.pr_ttydev;
-	
-	uid_t uid;
-	int pastime,hour,min,sec;
 
-	uid = getuid();
-	tty = pinfo.pr_ttydev;
-	pastime=(int)time(NULL);
-	sec=pastime;
-	min=(pastime/60);
-	hour=(pastime/3600);
+	pw = getpwuid(pinfo.pr_uid);	// name 얻어오기 위해
+	
+	tty = pinfo.pr_ttydev;			// not tty
+	mysid = getsid(getpid());
 
 	switch(option){
 		case 0:		// no option
-			if(uid == pinfo.pr_uid){	// no tty different
+			if(pinfo.pr_sid == mysid){	// no tty different
 				printf("%d\t", pinfo.pr_pid);
 				printf("%d\t", tty);	//tty
 				printf("%2d:", pinfo.pr_time.tv_sec/60);
@@ -107,7 +98,7 @@ int printProcess(struct psinfo pinfo, char option)
 			}
 			break;
 		case 'j':
-			if(uid == pinfo.pr_uid){	// no tty different
+			if(pinfo.pr_sid == mysid){	// no tty different
 				printf("%d\t", pinfo.pr_pid);
 				printf("%d\t", pinfo.pr_pgid);
 				printf("%d\t", pinfo.pr_sid);
@@ -125,17 +116,19 @@ int printProcess(struct psinfo pinfo, char option)
 			printf("%s\n", pinfo.pr_fname);
 			break;
 		case 'f':
-			printf("%s\t", pw->pw_name);
-			printf("%d\t", pinfo.pr_pid);
-			printf("%d\t", pinfo.pr_ppid);
-			printf("%d\t", pinfo.pr_argc);
-			printf("%02d:", ((pinfo.pr_start.tv_sec/3600)+9)%24);	// not today no code
-			printf("%02d:", (pinfo.pr_start.tv_sec%3600)/60);
-			printf("%02d\t", pinfo.pr_start.tv_sec%60);
-			printf("tty\t"); // tty space
-			printf("%02d:", pinfo.pr_time.tv_sec/60);
-			printf("%02d\t", pinfo.pr_time.tv_sec%60);
-			printf("%s\n", pinfo.pr_fname);
+			if(pinfo.pr_sid == mysid){
+				printf("%s\t", pw->pw_name);
+				printf("%d\t", pinfo.pr_pid);
+				printf("%d\t", pinfo.pr_ppid);
+				printf("%d\t", pinfo.pr_argc);		// not c
+				printf("%02d:", ((pinfo.pr_start.tv_sec/3600)+9)%24);	// not today no code
+				printf("%02d:", (pinfo.pr_start.tv_sec%3600)/60);
+				printf("%02d\t", pinfo.pr_start.tv_sec%60);
+				printf("tty\t"); // tty space
+				printf("%02d:", pinfo.pr_time.tv_sec/60);
+				printf("%02d\t", pinfo.pr_time.tv_sec%60);
+				printf("%s\n", pinfo.pr_fname);
+			}
 			break;
 		case 's':
 			if(atoi(optarg) == pinfo.pr_sid){
@@ -180,8 +173,6 @@ int main(int argc, char **argv)
 	extern int optind;
 	char option;
 
-	uid = getuid();
-
 	if(argc == 1){	// no option	
 		printf("PID\tTTY\tTIME\tCMD\n");
 		enumProcess(printProcess, 0);	
@@ -200,7 +191,6 @@ int main(int argc, char **argv)
 			case 'f':
 				printf("UID\tPID\tPPID\tC\tSTIME\t\tTTY\tTIME\tCMD\n");
 				option = 'f';
-				printf("UID\tPID\tPPID\tC\tSTIME\tTTY\tTIME\tCMD\n");
 				break;
 			case 's':	// sid가 인자와 같은 프로세스만 출력	
 				printf("PID\tTTY\tTIME\tCMD\n");
