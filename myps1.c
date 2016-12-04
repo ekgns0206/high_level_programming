@@ -71,6 +71,10 @@ int main(int argc, char **argv)
 	extern int optind;
 	char option;
 	time_t mytime;
+	
+	// 나의 sid, uid 얻기
+	mysid = getsid(getpid());
+	myuid = getuid();
 
 	// on option
 	if(argc == 1)	
@@ -78,10 +82,6 @@ int main(int argc, char **argv)
 		printf("PID\tTTY\t TIME\tCMD\n");
 		enumProcess(printProcess, 0);	
 	}
-	
-	// 나의 sid, uid 얻기
-	mysid = getsid(getpid());
-	myuid = getuid();
 
 	// system time, local time 가져오기
 	mytime = time(NULL);
@@ -404,7 +404,7 @@ int printProcess(struct psinfo pinfo, char option)
 				printf("%s\t", tty);
 				printf("%2d:", pinfo.pr_time.tv_sec/60);
 				printf("%02d\t", pinfo.pr_time.tv_sec%60);
-				printf("%s\n", pinfo.pr_fname);
+				printf("%s\n", pinfo.pr_psargs);
 			}
 			break;
 		case 'k':
@@ -445,59 +445,61 @@ void help(void)
 	printf("< ----------  사용할 수 있는 옵션들 ---------- >\n\n");
 	printf("No option : \n");
 	printf("\t\t현재 터미널에서 실행되는 프로세스에 대한 정보를 출력한다.\n");
-	printf("\t\tpid  tty  time(min,sec) fname\n\n");
+	printf("\t\tpid  tty  time(min,sec) CMD\n\n");
 
 	printf("j option : \n");
 	printf("\t\t현재 터미널에서 실행되는 프로세스에 대한 정보를 출력한다.\n");
-	printf("\t\tpid  pgid  sid tty  time(min,sec) fname\n\n");
+	printf("\t\tpid  pgid  sid tty  time(min,sec) CMD\n\n");
 
 	printf("e option : \n");
 	printf("\t\t전체 프로세스에 대한 정보를 출력한다.\n");
-	printf("\t\tpid  tty  time(min,sec) fname\n\n");
+	printf("\t\tpid  tty  time(min,sec) CMD\n\n");
 
 	printf("f option : \n");
 	printf("\t\t현재 터미널에서 실행되는 프로세스에 대한 정보를 출력한다.\n");
-	printf("\t\tloginName  pid  ppid  C  startTime  tty  time(min,sec) fname\n\n");
+	printf("\t\tloginName  pid  ppid  C  startTime  tty  time(min,sec) CMD\n\n");
 
 	printf("A option : \n");
 	printf("\t\t전체 프로세스에 대한 정보를 출력한다.\n");
-	printf("\t\tpid  tty  time(min,sec) fname\n\n");
+	printf("\t\tpid  tty  time(min,sec) CMD\n\n");
 
 	printf("s option (-s [target_sid]) : \n");
 	printf("\t\tsid가 일치하는 프로세스에 대한 정보를 출력한다.\n");
-	printf("\t\tpid  tty  time(min,sec) fname\n\n");
+	printf("\t\tpid  tty  time(min,sec) CMD\n\n");
 
 	printf("p option (-p [target_pid]) : \n");
 	printf("\t\tpid가 일치하는 프로세스에 대한 정보를 출력한다.\n");
-	printf("\t\tpid  tty  time(min,sec) fname\n\n");
+	printf("\t\tpid  tty  time(min,sec) CMD\n\n");
 
 	printf("g option (-g [target_pgid]) : \n");
 	printf("\t\tpgid가 일치하는 프로세스에 대한 정보를 출력한다.\n");
-	printf("\t\tpid  tty  time(min,sec) fname\n\n");
+	printf("\t\tpid  tty  time(min,sec) CMD\n\n");
 
 	printf("u option (-u [target_uid]) : \n");
 	printf("\t\tloginName이 일치하는 프로세스에 대한 정보를 출력한다.\n");
-	printf("\t\tpid  tty  time(min,sec) fname\n\n");
+	printf("\t\tpid  tty  time(min,sec) CMD\n\n");
 
 	printf("z option : \n");
 	printf("\t\tloginName이 일치하는 프로세스에 대한 정보를 출력한다.\n");
-	printf("\t\tpid  tty  time(min,sec) fname\n\n");
+	printf("\t\tpid  tty  time(min,sec) CMD\n\n");
 	
 	printf("m option (-m [target_CMD] : \n");
 	printf("\t\tCMD가 일치하는 프로세스에 대한 정보를 출력한다.\n");
-	printf("\t\tloginName  pid  ppid  C  startTime  tty  time(min,sec) fname\n\n");
-	printf("\t\tpid  tty  time(min,sec) fname\n\n");
+	printf("\t\tuid  pid  ppid  stime(hour,min,sec)  tty  time(min,sec) CMD\n\n");
 
 	printf("t option (-t [target_terminal] : \n");
 	printf("\t\tterminal이 일치하는 프로세스에 대한 정보를 출력한다.\n");
-	printf("\t\tpid  tty  time(min,sec) fname\n\n");
+	printf("\t\tpid  tty  time(min,sec) CMD\n\n");
 
 	printf("U option : \n");
     printf("\t\t내 uid로 설정되어 있는 프로세스에 대한 정보를 출력한다.\n");
     printf("\t\t담당중인 터미널이 없거나 다르더라도 출력한다.\n");
-	printf("\t\tpid  tty  time(min,sec) fname\n\n");
+	printf("\t\tpid  tty  time(min,sec) CMD\n\n");
 
 	printf("k option : \n");
     printf("\t\t전체 프로세스의 SIZE와 RES를 출력한다.\n");
-	printf("\t\tpid  tty  time(min,sec) SIZE RES fname\n\n");
+	printf("\t\tpid  tty  time(min,sec) SIZE RES CMD\n\n");
+
+	printf("h option : \n");
+    printf("\t\t옵션 사용법을 출력한다.\n");
 }
