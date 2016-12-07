@@ -457,7 +457,7 @@ void help(void)
 
 	printf("f option : \n");
 	printf("\t\t현재 터미널에서 실행되는 프로세스에 대한 정보를 출력한다.\n");
-	printf("\t\tloginName  pid  ppid  C  startTime  tty  time(min,sec) CMD\n\n");
+	printf("\t\tloginName  pid  ppid  startTime  tty  time(min,sec) CMD\n\n");
 
 	printf("A option : \n");
 	printf("\t\t전체 프로세스에 대한 정보를 출력한다.\n");
@@ -480,8 +480,8 @@ void help(void)
 	printf("\t\tpid  tty  time(min,sec) CMD\n\n");
 
 	printf("z option : \n");
-	printf("\t\tloginName이 일치하는 프로세스에 대한 정보를 출력한다.\n");
-	printf("\t\tpid  tty  time(min,sec) CMD\n\n");
+	printf("\t\t전체 프로세스에 대한 상세한 정보를 출력한다\n");
+	printf("\t\tloginName  pid  ppid  startTime  tty  time(min,sec) CMD\n\n");
 	
 	printf("m option (-m [target_CMD] : \n");
 	printf("\t\tCMD가 일치하는 프로세스에 대한 정보를 출력한다.\n");
